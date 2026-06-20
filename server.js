@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 
+
 import { enviarMensagem } from './services/evolution.js';
 
+const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
 //Menu principal do bot
 const MENU_PRINCIPAL = `Olá, eu sou Ode 👨🏽‍💻,
@@ -39,6 +41,31 @@ app.post('/webhook', async (req, res) => {
     );
 
     console.log('📩 Evento recebido');
+
+    /*
+|--------------------------------------------------------------------------
+| Ignora mensagens antigas
+|--------------------------------------------------------------------------
+| A Evolution pode reenviar mensagens antigas quando reinicia.
+| Se a mensagem tiver mais de 60 segundos, ela será ignorada.
+*/
+    const timestamp = req.body?.data?.messageTimestamp;
+
+    const agora = Math.floor(Date.now() / 1000);
+
+    const idadeMensagem = agora - timestamp;
+
+    console.log('Idade da mensagem:', idadeMensagem, 'segundos');
+
+    if (idadeMensagem > tempoMaximo) {
+
+        console.log(
+            '🚫 Mensagem antiga ignorada'
+        );
+
+        return res.sendStatus(200);
+
+    }
 
     /*
     |--------------------------------------------------------------------------
