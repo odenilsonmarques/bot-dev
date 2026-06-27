@@ -6,6 +6,8 @@ import { enviarMensagem } from './services/evolution.js';
 
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
+const sessoes = new Map();
+
 //Menu principal do bot
 const MENU_PRINCIPAL = `Olá, eu sou Ode 👨🏽‍💻,
 assistente virtual do Odenilson Marques.
@@ -13,10 +15,108 @@ assistente virtual do Odenilson Marques.
 Como posso ajudar você hoje?
 
 1️⃣ Desenvolvimento Front-end
+
 2️⃣ Desenvolvimento Back-end
-3️⃣ Desenvolvimento Full Stack
-4️⃣ Ver Portfólio
-5️⃣ Falar diretamente comigo`;
+
+3️⃣ Ver Portfólio
+
+4️⃣ Falar diretamente comigo `;
+
+
+/*
+|--------------------------------------------------------------------------
+| Estados da conversa
+|--------------------------------------------------------------------------
+*/
+const ESTADOS = {
+
+    MENU_PRINCIPAL: 'MENU_PRINCIPAL',
+
+    FRONTEND: 'FRONTEND',
+
+    BACKEND: 'BACKEND',
+
+    PORTFOLIO: 'PORTFOLIO',
+
+    CONTATO: 'CONTATO'
+
+};
+
+
+const MENU_FRONTEND = `🚀 Desenvolvimento Front-end
+
+Tenho experiência com as seguintes tecnologias:
+
+✅ HTML
+✅ CSS
+✅ JavaScript
+✅ Bootstrap
+
+💼 Precisa de um desenvolvedor para o seu projeto?
+
+Digite 4 para falar diretamente comigo.
+
+0️⃣ Para retornar ao menu.`;
+
+
+const MENU_BACKEND = `⚙️ Desenvolvimento Back-end
+
+Tenho experiência com as seguintes tecnologias:
+
+✅ PHP
+✅ MySQL
+✅ Laravel
+✅ WordPress
+✅ APIs REST
+✅ Docker
+
+💼 Precisa de um desenvolvedor para o seu projeto?
+
+Digite 4 para falar diretamente comigo.
+
+0️⃣ Para retornar ao menu.`;
+
+
+const MENU_PORTFOLIO = `💻 Portfólio
+
+GitHub:
+🔗 https://github.com/odenilsonmarques
+
+LinkedIn:               
+🔗 https://linkedin.com/in/odenilsonmarques;   
+
+Site:
+🔗 https://odenilsonmarques.github.io/portfolio/#start
+
+
+💼 Precisa de um desenvolvedor para o seu projeto?
+
+Digite 4 para falar diretamente comigo.
+
+
+0️⃣ Para retornar ao menu.`;
+
+
+
+const MENSAGEM_CONTATO = `Perfeito! 😊
+
+Recebi seu pedido de atendimento.
+
+O Odenilson falará com você em breve.
+
+0️⃣ Para retornar ao menu.`;
+
+
+const OPCOES = {
+    VOLTAR: '0',
+    FRONTEND: '1',
+    BACKEND: '2',
+    PORTFOLIO: '3',
+    CONTATO: '4'
+};
+
+
+
 
 const app = express();
 
@@ -131,9 +231,15 @@ app.post('/webhook', async (req, res) => {
     | extendedTextMessage:
     | Respostas, encaminhamentos e outros formatos.
     */
+    // const mensagem =
+    //     req.body?.data?.message?.conversation ||
+    //     req.body?.data?.message?.extendedTextMessage?.text;
+
     const mensagem =
-        req.body?.data?.message?.conversation ||
-        req.body?.data?.message?.extendedTextMessage?.text;
+        (
+            req.body?.data?.message?.conversation ||
+            req.body?.data?.message?.extendedTextMessage?.text
+        )?.trim().toLowerCase();
 
     console.log('Número:', numero);
     console.log('Mensagem:', mensagem);
@@ -158,12 +264,241 @@ app.post('/webhook', async (req, res) => {
     | Quando o usuário enviar "oi",
     | o bot responderá automaticamente.
     */
-    if (mensagem.toLowerCase() === 'oi' || mensagem.toLowerCase() === 'menu') {
+    // if (mensagem.toLowerCase() === 'oi' || mensagem.toLowerCase() === 'menu') {
+
+    //     await enviarMensagem(
+    //         numero,
+    //         MENU_PRINCIPAL
+    //     );
+
+    // }
+
+    // await enviarMensagem(
+    //     numero,
+    //     MENU_PRINCIPAL
+    // );
+
+    // sessoes.set(numero, ESTADOS.MENU_PRINCIPAL);
+
+
+    if (!sessoes.has(numero)) {
 
         await enviarMensagem(
             numero,
             MENU_PRINCIPAL
         );
+
+        sessoes.set(
+            numero,
+            ESTADOS.MENU_PRINCIPAL
+        );
+
+        return res.sendStatus(200);
+
+    }
+
+
+    if (sessoes.get(numero) === ESTADOS.MENU_PRINCIPAL) {
+
+        if (mensagem === OPCOES.FRONTEND) {
+
+            await enviarMensagem(
+                numero,
+                MENU_FRONTEND
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.FRONTEND
+            );
+
+        }
+        else if (mensagem === OPCOES.BACKEND) {
+
+            await enviarMensagem(
+                numero,
+                MENU_BACKEND
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.BACKEND
+            );
+
+        }
+        else if (mensagem === OPCOES.PORTFOLIO) {
+
+            await enviarMensagem(
+                numero,
+                MENU_PORTFOLIO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.PORTFOLIO
+            );
+
+        }
+        else if (mensagem === OPCOES.CONTATO) {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.FRONTEND) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+        else if (mensagem === OPCOES.CONTATO) {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_FRONTEND
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.BACKEND) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+
+        else if (mensagem === '4') {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_BACKEND
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.PORTFOLIO) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+        else if (mensagem === '4') {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_PORTFOLIO
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.CONTATO) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+
+        // Ignora qualquer outra mensagem
 
     }
 
