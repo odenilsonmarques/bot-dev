@@ -7,122 +7,15 @@ import express from 'express';
 //importando a função enviarMensagem do arquivo evolution.js
 import { enviarMensagem } from './services/evolution.js';
 
+import { ESTADOS } from './constants/estados.js';
+import { MENU_PRINCIPAL, MENU_FRONTEND, MENU_BACKEND, MENU_PORTFOLIO, MENSAGEM_CONTATO } from './constants/menus.js';
+import { OPCOES } from './constants/opcoes.js';
+
 // Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
 // Mapa para armazenar o estado da conversa de cada usuário
 const sessoes = new Map();
-
-//Menu principal do bot
-const MENU_PRINCIPAL = `Olá, eu sou Ode 👨🏽‍💻,
-assistente virtual do Odenilson Marques.
-
-Como posso ajudar você hoje?
-
-1️⃣ Desenvolvimento Front-end
-
-2️⃣ Desenvolvimento Back-end
-
-3️⃣ Ver Portfólio
-
-4️⃣ Falar diretamente comigo. `;
-
-
-//  Estados da conversa do bot
-const ESTADOS = {
-
-    MENU_PRINCIPAL: 'MENU_PRINCIPAL',
-
-    FRONTEND: 'FRONTEND',
-
-    BACKEND: 'BACKEND',
-
-    PORTFOLIO: 'PORTFOLIO',
-
-    CONTATO: 'CONTATO'
-
-};
-
-// Estados das opções do menu principal
-const OPCOES = {
-    VOLTAR: '0',
-    FRONTEND: '1',
-    BACKEND: '2',
-    PORTFOLIO: '3',
-    CONTATO: '4'
-};
-
-
-// Mensagem de rodapé para os menus
-const MENSAGEM_RODAPE_MENU = `
-💼 Precisa de um desenvolvedor para o seu projeto?
-
-4️⃣ Falar diretamente comigo.
-
-0️⃣ Voltar ao menu principal.`;
-
-
-// Links do portfólio, GitHub e LinkedIn
-const LINKS = {
-    PORTFOLIO: 'https://odenilsonmarques.github.io/portfolio/#start',
-    GITHUB: 'https://github.com/odenilsonmarques',
-    LINKEDIN: 'https://linkedin.com/in/odenilsonmarques'
-};
-
-
-// Menu de desenvolvimento front-end
-const MENU_FRONTEND = `🚀 Desenvolvimento Front-end
-
-Tenho experiência com as seguintes tecnologias:
-
-✅ HTML
-✅ CSS
-✅ JavaScript
-✅ Bootstrap
-
-${MENSAGEM_RODAPE_MENU}`;
-
-
-// Menu de desenvolvimento back-end
-const MENU_BACKEND = `⚙️ Desenvolvimento Back-end
-
-Tenho experiência com as seguintes tecnologias:
-
-✅ PHP
-✅ MySQL
-✅ Laravel
-✅ WordPress
-✅ APIs REST
-✅ Docker
-
-${MENSAGEM_RODAPE_MENU}`;
-
-
-// Menu de portfólio
-const MENU_PORTFOLIO = `💻 Portfólio
-
-🌐 Portfólio
-${LINKS.PORTFOLIO}
-
-🐙 GitHub
-${LINKS.GITHUB}
-
-💼 LinkedIn
-${LINKS.LINKEDIN}
-
-${MENSAGEM_RODAPE_MENU}`;
-
-
-// Mensagem de contato
-const MENSAGEM_CONTATO = `Perfeito! 😊
-
-Recebi seu pedido de atendimento.
-
-O Odenilson falará com você em breve.
-
-0️⃣ Voltar ao menu principal.`;
-
-
 
 const app = express();
 
@@ -237,16 +130,11 @@ app.post('/webhook', async (req, res) => {
     | extendedTextMessage:
     | Respostas, encaminhamentos e outros formatos.
     */
-    // const mensagem =
-    //     req.body?.data?.message?.conversation ||
-    //     req.body?.data?.message?.extendedTextMessage?.text;
-
     const mensagem =
         (
             req.body?.data?.message?.conversation ||
             req.body?.data?.message?.extendedTextMessage?.text
         )?.trim().toLowerCase();
-
     console.log('Número:', numero);
     console.log('Mensagem:', mensagem);
 
@@ -256,37 +144,11 @@ app.post('/webhook', async (req, res) => {
     |--------------------------------------------------------------------------
     */
     if (!mensagem) {
-
         console.log('⚠️ Evento sem texto');
-
         return res.sendStatus(200);
-
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Primeira regra do bot
-    |--------------------------------------------------------------------------
-    | Quando o usuário enviar "oi",
-    | o bot responderá automaticamente.
-    */
-    // if (mensagem.toLowerCase() === 'oi' || mensagem.toLowerCase() === 'menu') {
-
-    //     await enviarMensagem(
-    //         numero,
-    //         MENU_PRINCIPAL
-    //     );
-
-    // }
-
-    // await enviarMensagem(
-    //     numero,
-    //     MENU_PRINCIPAL
-    // );
-
-    // sessoes.set(numero, ESTADOS.MENU_PRINCIPAL);
-
-
+    // Se não existir sessão para o usuário, cria uma nova sessão e envia o menu principal
     if (!sessoes.has(numero)) {
 
         await enviarMensagem(
