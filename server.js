@@ -1,11 +1,16 @@
+//importando variáveis de ambiente do arquivo .env
 import 'dotenv/config';
+
+//importando o framework Express
 import express from 'express';
 
-
+//importando a função enviarMensagem do arquivo evolution.js
 import { enviarMensagem } from './services/evolution.js';
 
+// Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
+// Mapa para armazenar o estado da conversa de cada usuário
 const sessoes = new Map();
 
 //Menu principal do bot
@@ -20,14 +25,10 @@ Como posso ajudar você hoje?
 
 3️⃣ Ver Portfólio
 
-4️⃣ Falar diretamente comigo `;
+4️⃣ Falar diretamente comigo. `;
 
 
-/*
-|--------------------------------------------------------------------------
-| Estados da conversa
-|--------------------------------------------------------------------------
-*/
+//  Estados da conversa do bot
 const ESTADOS = {
 
     MENU_PRINCIPAL: 'MENU_PRINCIPAL',
@@ -42,7 +43,34 @@ const ESTADOS = {
 
 };
 
+// Estados das opções do menu principal
+const OPCOES = {
+    VOLTAR: '0',
+    FRONTEND: '1',
+    BACKEND: '2',
+    PORTFOLIO: '3',
+    CONTATO: '4'
+};
 
+
+// Mensagem de rodapé para os menus
+const MENSAGEM_RODAPE_MENU = `
+💼 Precisa de um desenvolvedor para o seu projeto?
+
+4️⃣ Falar diretamente comigo.
+
+0️⃣ Voltar ao menu principal.`;
+
+
+// Links do portfólio, GitHub e LinkedIn
+const LINKS = {
+    PORTFOLIO: 'https://odenilsonmarques.github.io/portfolio/#start',
+    GITHUB: 'https://github.com/odenilsonmarques',
+    LINKEDIN: 'https://linkedin.com/in/odenilsonmarques'
+};
+
+
+// Menu de desenvolvimento front-end
 const MENU_FRONTEND = `🚀 Desenvolvimento Front-end
 
 Tenho experiência com as seguintes tecnologias:
@@ -52,13 +80,10 @@ Tenho experiência com as seguintes tecnologias:
 ✅ JavaScript
 ✅ Bootstrap
 
-💼 Precisa de um desenvolvedor para o seu projeto?
-
-Digite 4 para falar diretamente comigo.
-
-0️⃣ Para retornar ao menu.`;
+${MENSAGEM_RODAPE_MENU}`;
 
 
+// Menu de desenvolvimento back-end
 const MENU_BACKEND = `⚙️ Desenvolvimento Back-end
 
 Tenho experiência com as seguintes tecnologias:
@@ -70,51 +95,32 @@ Tenho experiência com as seguintes tecnologias:
 ✅ APIs REST
 ✅ Docker
 
-💼 Precisa de um desenvolvedor para o seu projeto?
-
-Digite 4 para falar diretamente comigo.
-
-0️⃣ Para retornar ao menu.`;
+${MENSAGEM_RODAPE_MENU}`;
 
 
+// Menu de portfólio
 const MENU_PORTFOLIO = `💻 Portfólio
 
-GitHub:
-🔗 https://github.com/odenilsonmarques
+🌐 Portfólio
+${LINKS.PORTFOLIO}
 
-LinkedIn:               
-🔗 https://linkedin.com/in/odenilsonmarques;   
+🐙 GitHub
+${LINKS.GITHUB}
 
-Site:
-🔗 https://odenilsonmarques.github.io/portfolio/#start
+💼 LinkedIn
+${LINKS.LINKEDIN}
 
-
-💼 Precisa de um desenvolvedor para o seu projeto?
-
-Digite 4 para falar diretamente comigo.
+${MENSAGEM_RODAPE_MENU}`;
 
 
-0️⃣ Para retornar ao menu.`;
-
-
-
+// Mensagem de contato
 const MENSAGEM_CONTATO = `Perfeito! 😊
 
 Recebi seu pedido de atendimento.
 
 O Odenilson falará com você em breve.
 
-0️⃣ Para retornar ao menu.`;
-
-
-const OPCOES = {
-    VOLTAR: '0',
-    FRONTEND: '1',
-    BACKEND: '2',
-    PORTFOLIO: '3',
-    CONTATO: '4'
-};
-
+0️⃣ Voltar ao menu principal.`;
 
 
 
