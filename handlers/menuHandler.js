@@ -1,0 +1,234 @@
+//importando a função enviarMensagem do arquivo evolution.js
+import { enviarMensagem } from '../services/evolution.js';
+
+import { ESTADOS } from '../constants/estados.js';
+import { MENU_PRINCIPAL, MENU_FRONTEND, MENU_BACKEND, MENU_PORTFOLIO, MENSAGEM_CONTATO } from '../constants/menus.js';
+import { OPCOES } from '../constants/opcoes.js';
+
+export async function tratarMenu
+    (
+        numero,
+        mensagem,
+        sessoes
+    ) {
+
+    if (!sessoes.has(numero)) {
+
+        await enviarMensagem(
+            numero,
+            MENU_PRINCIPAL
+        );
+
+        sessoes.set(
+            numero,
+            ESTADOS.MENU_PRINCIPAL
+        );
+
+        return res.sendStatus(200);
+
+    }
+
+
+    if (sessoes.get(numero) === ESTADOS.MENU_PRINCIPAL) {
+
+        if (mensagem === OPCOES.FRONTEND) {
+
+            await enviarMensagem(
+                numero,
+                MENU_FRONTEND
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.FRONTEND
+            );
+
+        }
+        else if (mensagem === OPCOES.BACKEND) {
+
+            await enviarMensagem(
+                numero,
+                MENU_BACKEND
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.BACKEND
+            );
+
+        }
+        else if (mensagem === OPCOES.PORTFOLIO) {
+
+            await enviarMensagem(
+                numero,
+                MENU_PORTFOLIO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.PORTFOLIO
+            );
+
+        }
+        else if (mensagem === OPCOES.CONTATO) {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.FRONTEND) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+        else if (mensagem === OPCOES.CONTATO) {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_FRONTEND
+            );
+
+        }
+
+    }
+    else if (sessoes.get(numero) === ESTADOS.BACKEND) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+
+        else if (mensagem === '4') {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_BACKEND
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.PORTFOLIO) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+        else if (mensagem === '4') {
+
+            await enviarMensagem(
+                numero,
+                MENSAGEM_CONTATO
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.CONTATO
+            );
+
+        }
+        else {
+
+            await enviarMensagem(
+                numero,
+                MENU_PORTFOLIO
+            );
+
+        }
+
+    }
+
+    else if (sessoes.get(numero) === ESTADOS.CONTATO) {
+
+        if (mensagem === '0') {
+
+            await enviarMensagem(
+                numero,
+                MENU_PRINCIPAL
+            );
+
+            sessoes.set(
+                numero,
+                ESTADOS.MENU_PRINCIPAL
+            );
+
+        }
+
+        // Ignora qualquer outra mensagem
+
+    }
+}

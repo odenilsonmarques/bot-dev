@@ -4,12 +4,7 @@ import 'dotenv/config';
 //importando o framework Express
 import express from 'express';
 
-//importando a função enviarMensagem do arquivo evolution.js
-import { enviarMensagem } from './services/evolution.js';
-
-import { ESTADOS } from './constants/estados.js';
-import { MENU_PRINCIPAL, MENU_FRONTEND, MENU_BACKEND, MENU_PORTFOLIO, MENSAGEM_CONTATO } from './constants/menus.js';
-import { OPCOES } from './constants/opcoes.js';
+import { tratarMenu } from './handlers/menuHandler.js';
 
 // Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
@@ -19,12 +14,8 @@ const sessoes = new Map();
 
 const app = express();
 
-/*
-|--------------------------------------------------------------------------
-| Middleware
-|--------------------------------------------------------------------------
-| Permite que o Express receba JSON enviado pela Evolution API.
-*/
+
+// Permite que o Express receba JSON enviado pela Evolution API.
 app.use(express.json());
 
 /*
@@ -138,252 +129,25 @@ app.post('/webhook', async (req, res) => {
     console.log('Número:', numero);
     console.log('Mensagem:', mensagem);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Se não existir texto, encerra processamento
-    |--------------------------------------------------------------------------
-    */
+    // Se não existir texto, encerra processamento
     if (!mensagem) {
         console.log('⚠️ Evento sem texto');
         return res.sendStatus(200);
     }
 
-    // Se não existir sessão para o usuário, cria uma nova sessão e envia o menu principal
-    if (!sessoes.has(numero)) {
-
-        await enviarMensagem(
-            numero,
-            MENU_PRINCIPAL
-        );
-
-        sessoes.set(
-            numero,
-            ESTADOS.MENU_PRINCIPAL
-        );
-
-        return res.sendStatus(200);
-
-    }
-
-
-    if (sessoes.get(numero) === ESTADOS.MENU_PRINCIPAL) {
-
-        if (mensagem === OPCOES.FRONTEND) {
-
-            await enviarMensagem(
-                numero,
-                MENU_FRONTEND
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.FRONTEND
-            );
-
-        }
-        else if (mensagem === OPCOES.BACKEND) {
-
-            await enviarMensagem(
-                numero,
-                MENU_BACKEND
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.BACKEND
-            );
-
-        }
-        else if (mensagem === OPCOES.PORTFOLIO) {
-
-            await enviarMensagem(
-                numero,
-                MENU_PORTFOLIO
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.PORTFOLIO
-            );
-
-        }
-        else if (mensagem === OPCOES.CONTATO) {
-
-            await enviarMensagem(
-                numero,
-                MENSAGEM_CONTATO
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.CONTATO
-            );
-
-        }
-        else {
-
-            await enviarMensagem(
-                numero,
-                MENU_PRINCIPAL
-            );
-
-        }
-
-    }
-
-    else if (sessoes.get(numero) === ESTADOS.FRONTEND) {
-
-        if (mensagem === '0') {
-
-            await enviarMensagem(
-                numero,
-                MENU_PRINCIPAL
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.MENU_PRINCIPAL
-            );
-
-        }
-        else if (mensagem === OPCOES.CONTATO) {
-
-            await enviarMensagem(
-                numero,
-                MENSAGEM_CONTATO
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.CONTATO
-            );
-
-        }
-        else {
-
-            await enviarMensagem(
-                numero,
-                MENU_FRONTEND
-            );
-
-        }
-
-    }
-
-    else if (sessoes.get(numero) === ESTADOS.BACKEND) {
-
-        if (mensagem === '0') {
-
-            await enviarMensagem(
-                numero,
-                MENU_PRINCIPAL
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.MENU_PRINCIPAL
-            );
-
-        }
-
-        else if (mensagem === '4') {
-
-            await enviarMensagem(
-                numero,
-                MENSAGEM_CONTATO
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.CONTATO
-            );
-
-        }
-
-        else {
-
-            await enviarMensagem(
-                numero,
-                MENU_BACKEND
-            );
-
-        }
-
-    }
-
-    else if (sessoes.get(numero) === ESTADOS.PORTFOLIO) {
-
-        if (mensagem === '0') {
-
-            await enviarMensagem(
-                numero,
-                MENU_PRINCIPAL
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.MENU_PRINCIPAL
-            );
-
-        }
-        else if (mensagem === '4') {
-
-            await enviarMensagem(
-                numero,
-                MENSAGEM_CONTATO
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.CONTATO
-            );
-
-        }
-        else {
-
-            await enviarMensagem(
-                numero,
-                MENU_PORTFOLIO
-            );
-
-        }
-
-    }
-
-    else if (sessoes.get(numero) === ESTADOS.CONTATO) {
-
-        if (mensagem === '0') {
-
-            await enviarMensagem(
-                numero,
-                MENU_PRINCIPAL
-            );
-
-            sessoes.set(
-                numero,
-                ESTADOS.MENU_PRINCIPAL
-            );
-
-        }
-
-        // Ignora qualquer outra mensagem
-
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Retorna sucesso para a Evolution API
-    |--------------------------------------------------------------------------
-    */
+    // Chama a função tratarMenu para processar a mensagem recebida
+    await tratarMenu(
+        numero,
+        mensagem,
+        sessoes
+    );
+
+    // Retorna sucesso para a Evolution API
     res.sendStatus(200);
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| Inicialização do servidor
-|--------------------------------------------------------------------------
-*/
+// Inicialização do servidor
 app.listen(process.env.PORT, '0.0.0.0', () => {
 
     console.log(
