@@ -4,6 +4,10 @@ import 'dotenv/config';
 //importando o framework Express
 import express from 'express';
 
+//importando as funções e constantes necessárias para o funcionamento do bot
+import { enviarMensagem } from './services/evolution.js';
+import { ESTADOS } from './constants/estados.js';
+import { MENU_PRINCIPAL } from './constants/menus.js';
 import { tratarMenu } from './handlers/menuHandler.js';
 
 // Tempo máximo de idade da mensagem em segundos
@@ -14,16 +18,10 @@ const sessoes = new Map();
 
 const app = express();
 
-
 // Permite que o Express receba JSON enviado pela Evolution API.
 app.use(express.json());
 
-/*
-|--------------------------------------------------------------------------
-| Webhook da Evolution API
-|--------------------------------------------------------------------------
-| Toda mensagem recebida pela instância do WhatsApp chegará aqui.
-*/
+// Webhook da Evolution API.  Toda mensagem recebida pela instância do WhatsApp chegará aqui.
 app.post('/webhook', async (req, res) => {
 
     console.log(
@@ -32,19 +30,10 @@ app.post('/webhook', async (req, res) => {
 
     console.log('📩 Evento recebido');
 
-    /*
-|--------------------------------------------------------------------------
-| Ignora mensagens antigas
-|--------------------------------------------------------------------------
-| A Evolution pode reenviar mensagens antigas quando reinicia.
-| Se a mensagem tiver mais de 60 segundos, ela será ignorada.
-*/
+    //  Ignora mensagens antigas. A Evolution pode reenviar mensagens antigas quando reinicia. Se a mensagem tiver mais de 60 segundos, ela será ignorada.
     const timestamp = req.body?.data?.messageTimestamp;
-
     const agora = Math.floor(Date.now() / 1000);
-
     const idadeMensagem = agora - timestamp;
-
     console.log('Idade da mensagem:', idadeMensagem, 'segundos');
 
     if (idadeMensagem > tempoMaximo) {
@@ -54,16 +43,9 @@ app.post('/webhook', async (req, res) => {
         );
 
         return res.sendStatus(200);
-
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Ignora mensagens enviadas pelo próprio bot
-    |--------------------------------------------------------------------------
-    | Evita loops infinitos:
-    | Bot envia mensagem -> webhook recebe -> bot responde novamente.
-    */
+    // Ignora mensagens enviadas pelo próprio bot. Evitar loops infinitos.Bot envia mensagem -> webhook recebe -> bot responde novamente.
     const fromMe = req.body?.data?.key?.fromMe;
 
     if (fromMe) {
@@ -71,7 +53,6 @@ app.post('/webhook', async (req, res) => {
         console.log('🚫 Mensagem enviada pelo próprio bot');
 
         return res.sendStatus(200);
-
     }
 
     /*
@@ -86,26 +67,15 @@ app.post('/webhook', async (req, res) => {
     */
     const jid = req.body?.data?.key?.remoteJid;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Ignora grupos
-    |--------------------------------------------------------------------------
-    | Neste laboratório vamos trabalhar apenas com mensagens privadas.
-    */
+    //  Ignora grupos.
     if (!jid?.includes('@s.whatsapp.net')) {
 
         console.log('🚫 Grupo ignorado');
 
         return res.sendStatus(200);
-
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Extrai somente o número do WhatsApp
-    |--------------------------------------------------------------------------
-    | Remove o sufixo @s.whatsapp.net.
-    */
+    //  Extrai somente o número do WhatsApp. Remove o sufixo @s.whatsapp.net.
     const numero = jid.replace(
         '@s.whatsapp.net',
         ''
@@ -135,6 +105,22 @@ app.post('/webhook', async (req, res) => {
         return res.sendStatus(200);
     }
 
+    // Se não existir sessão para o usuário
+    if (!sessoes.has(numero)) {
+
+        await enviarMensagem(
+            numero,
+            MENU_PRINCIPAL
+        );
+
+        sessoes.set(
+            numero,
+            ESTADOS.MENU_PRINCIPAL
+        );
+
+        return res.sendStatus(200);
+    }
+
     // Chama a função tratarMenu para processar a mensagem recebida
     await tratarMenu(
         numero,
@@ -144,7 +130,6 @@ app.post('/webhook', async (req, res) => {
 
     // Retorna sucesso para a Evolution API
     res.sendStatus(200);
-
 });
 
 // Inicialização do servidor
@@ -153,5 +138,4 @@ app.listen(process.env.PORT, '0.0.0.0', () => {
     console.log(
         `🚀 Bot rodando na porta ${process.env.PORT}`
     );
-
 });
