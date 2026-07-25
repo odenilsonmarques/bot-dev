@@ -4,6 +4,9 @@ import 'dotenv/config';
 //importando o framework Express
 import express from 'express';
 
+//importando o gerenciador de sessões. Aqui importamos apenas as funções que vamos utilizar, mas você pode importar todas se quiser. Isso pq o server nao consulta estados, ele apenas verifica se existe uma sessão e cria uma quando necessário
+import { existeSessao, salvarSessao } from './sessions/sessionManager.js';
+
 //importando as funções e constantes necessárias para o funcionamento do bot
 import { enviarMensagem } from './services/evolution.js';
 import { ESTADOS } from './constants/estados.js';
@@ -12,9 +15,6 @@ import { tratarMenu } from './handlers/menuHandler.js';
 
 // Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
-
-// Mapa para armazenar o estado da conversa de cada usuário
-const sessoes = new Map();
 
 const app = express();
 
@@ -105,15 +105,15 @@ app.post('/webhook', async (req, res) => {
         return res.sendStatus(200);
     }
 
-    // Se não existir sessão para o usuário
-    if (!sessoes.has(numero)) {
+    // Se não existir sessão para o número, cria uma nova sessão e envia o menu principal
+    if (!existeSessao(numero)) {
 
         await enviarMensagem(
             numero,
             MENU_PRINCIPAL
         );
 
-        sessoes.set(
+        salvarSessao(
             numero,
             ESTADOS.MENU_PRINCIPAL
         );
@@ -124,8 +124,7 @@ app.post('/webhook', async (req, res) => {
     // Chama a função tratarMenu para processar a mensagem recebida
     await tratarMenu(
         numero,
-        mensagem,
-        sessoes
+        mensagem
     );
 
     // Retorna sucesso para a Evolution API

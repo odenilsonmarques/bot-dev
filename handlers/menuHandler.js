@@ -5,14 +5,16 @@ import { ESTADOS } from '../constants/estados.js';
 import { MENU_PRINCIPAL, MENU_FRONTEND, MENU_BACKEND, MENU_PORTFOLIO, MENSAGEM_CONTATO } from '../constants/menus.js';
 import { OPCOES } from '../constants/opcoes.js';
 
+import { obterSessao, salvarSessao } from '../sessions/sessionManager.js';
+
 import { tratarMenuFrontend } from './frontendHandler.js';
 import { tratarMenuBackend } from './backendHandler.js';
 import { tratarMenuPortfolio } from './portfolioHandler.js';
 import { tratarMenuContato } from './contatoHandler.js';
 
-export async function tratarMenu(numero, mensagem, sessoes) {
+export async function tratarMenu(numero, mensagem) {
 
-    if (sessoes.get(numero) === ESTADOS.MENU_PRINCIPAL) {
+    if (obterSessao(numero) === ESTADOS.MENU_PRINCIPAL) {
 
         if (mensagem === OPCOES.FRONTEND) {
 
@@ -21,7 +23,7 @@ export async function tratarMenu(numero, mensagem, sessoes) {
                 MENU_FRONTEND
             );
 
-            sessoes.set(
+            salvarSessao(
                 numero,
                 ESTADOS.FRONTEND
             );
@@ -34,7 +36,7 @@ export async function tratarMenu(numero, mensagem, sessoes) {
                 MENU_BACKEND
             );
 
-            sessoes.set(
+            salvarSessao(
                 numero,
                 ESTADOS.BACKEND
             );
@@ -47,7 +49,7 @@ export async function tratarMenu(numero, mensagem, sessoes) {
                 MENU_PORTFOLIO
             );
 
-            sessoes.set(
+            salvarSessao(
                 numero,
                 ESTADOS.PORTFOLIO
             );
@@ -60,7 +62,7 @@ export async function tratarMenu(numero, mensagem, sessoes) {
                 MENSAGEM_CONTATO
             );
 
-            sessoes.set(
+            salvarSessao(
                 numero,
                 ESTADOS.CONTATO
             );
@@ -77,25 +79,25 @@ export async function tratarMenu(numero, mensagem, sessoes) {
 
     }
 
-    else if (sessoes.get(numero) === ESTADOS.FRONTEND) {
+    else if (obterSessao(numero) === ESTADOS.FRONTEND) {
 
-        await tratarMenuFrontend(numero, mensagem, sessoes);
-
-    }
-    else if (sessoes.get(numero) === ESTADOS.BACKEND) {
-
-        await tratarMenuBackend(numero, mensagem, sessoes);
+        await tratarMenuFrontend(numero, mensagem);
     }
 
-    else if (sessoes.get(numero) === ESTADOS.PORTFOLIO) {
+    else if (obterSessao(numero) === ESTADOS.BACKEND) {
 
-        await tratarMenuPortfolio(numero, mensagem, sessoes);
+        await tratarMenuBackend(numero, mensagem);
+    }
+
+    else if (obterSessao(numero) === ESTADOS.PORTFOLIO) {
+
+        await tratarMenuPortfolio(numero, mensagem);
 
     }
 
-    else if (sessoes.get(numero) === ESTADOS.CONTATO) {
+    else if (obterSessao(numero) === ESTADOS.CONTATO) {
 
-        await tratarMenuContato(numero, mensagem, sessoes);
+        await tratarMenuContato(numero, mensagem);
 
     }
 }

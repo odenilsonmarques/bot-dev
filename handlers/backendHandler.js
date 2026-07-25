@@ -1,9 +1,11 @@
 import { enviarMensagem } from "../services/evolution.js";
 
+import { salvarSessao } from '../sessions/sessionManager.js';
+
 import { ESTADOS } from "../constants/estados.js";
 import { MENU_PRINCIPAL, MENU_BACKEND, MENSAGEM_CONTATO } from "../constants/menus.js";
 
-export async function tratarMenuBackend(numero, mensagem, sessoes) {
+export async function tratarMenuBackend(numero, mensagem) {
 
     if (mensagem === '0') {
 
@@ -12,7 +14,7 @@ export async function tratarMenuBackend(numero, mensagem, sessoes) {
             MENU_PRINCIPAL
         );
 
-        sessoes.set(
+        salvarSessao(
             numero,
             ESTADOS.MENU_PRINCIPAL
         );
@@ -25,7 +27,7 @@ export async function tratarMenuBackend(numero, mensagem, sessoes) {
             MENSAGEM_CONTATO
         );
 
-        sessoes.set(
+        salvarSessao(
             numero,
             ESTADOS.CONTATO
         );
