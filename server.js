@@ -13,6 +13,8 @@ import { ESTADOS } from './constants/estados.js';
 import { MENU_PRINCIPAL } from './constants/menus.js';
 import { tratarMenu } from './handlers/menuHandler.js';
 
+import { errorHandler } from './errors/errorHandler.js';
+
 // Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
@@ -121,11 +123,20 @@ app.post('/webhook', async (req, res) => {
         return res.sendStatus(200);
     }
 
-    // Chama a função tratarMenu para processar a mensagem recebida
-    await tratarMenu(
-        numero,
-        mensagem
-    );
+    try {
+
+        // Chama a função tratarMenu para processar a mensagem recebida
+        await tratarMenu(
+            numero,
+            mensagem
+        );
+
+    } catch (erro) {
+
+        // Chama o errorHandler para tratar o erro
+        errorHandler(erro);
+
+    }
 
     // Retorna sucesso para a Evolution API
     res.sendStatus(200);
