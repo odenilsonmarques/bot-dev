@@ -12,6 +12,9 @@ import { tratarMenuBackend } from './backendHandler.js';
 import { tratarMenuPortfolio } from './portfolioHandler.js';
 import { tratarMenuContato } from './contatoHandler.js';
 
+import { AppError } from '../errors/AppError.js';
+// import { errorHandler } from '../errors/errorHandler.js';
+
 export async function tratarMenu(numero, mensagem) {
 
     if (obterSessao(numero) === ESTADOS.MENU_PRINCIPAL) {
