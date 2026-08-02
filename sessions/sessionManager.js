@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { logger } from '../utils/logger.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -21,7 +23,7 @@ carregarSessoes();
 
 function persistirSessoes() {
 
-    console.log('Persistindo sessões em arquivo JSON...');
+    logger.info('Persistindo sessões em arquivo JSON...');
 
     // Converte o mapa de sessões em um objeto JSON
     const sessoesJson = Object.fromEntries(sessoes);

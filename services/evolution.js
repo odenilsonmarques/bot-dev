@@ -1,6 +1,8 @@
 // Biblioteca que permite fazer requisições HTTP, utilizada para enviar mensagens para a Evolution.
 import axios from 'axios';
 
+import { logger } from '../utils/logger.js';
+
 export async function enviarMensagem(numero, texto) {
 
     try {
@@ -23,15 +25,15 @@ export async function enviarMensagem(numero, texto) {
 
         );
 
-        console.log('✅ Mensagem enviada');
+        logger.info('✅ Mensagem enviada');
 
         return response.data;
 
     } catch (error) {
 
-        console.error('❌ Erro ao enviar mensagem');
+        logger.error('❌ Erro ao enviar mensagem');
 
-        console.error(
+        logger.error(
             error.response?.data || error.message
         );
 
