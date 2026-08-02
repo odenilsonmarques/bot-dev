@@ -1,37 +1,38 @@
 import { AppError } from './AppError.js';
+import { logger } from '../utils/logger.js';
 
 export function errorHandler(erro) {
 
     const dataHora = new Date().toLocaleString('pt-BR');
 
-    console.error('========================================');
-    console.error('[ERROR]');
-    console.error('');
+    logger.error('========================================');
+    logger.error('[ERROR]');
+    logger.error('');
 
-    console.error(`Data: ${dataHora}`);
-    console.error('');
+    logger.error(`Data: ${dataHora}`);
+    logger.error('');
 
-    console.error(`Tipo: ${erro.name}`);
-    console.error('');
+    logger.error(`Tipo: ${erro.name}`);
+    logger.error('');
 
-    console.error(`Mensagem:`);
-    console.error(erro.message);
-    console.error('');
+    logger.error(`Mensagem:`);
+    logger.error(erro.message);
+    logger.error('');
 
     if (erro instanceof AppError) {
 
-        console.error(`Status HTTP: ${erro.statusCode}`);
+        logger.error(`Status HTTP: ${erro.statusCode}`);
 
     } else {
 
-        console.error('Categoria: Erro inesperado');
-        console.error('');
-        console.error('Stack Trace:');
-        console.error(erro.stack);
+        logger.error('Categoria: Erro inesperado');
+        logger.error('');
+        logger.error('Stack Trace:');
+        logger.error(erro.stack);
 
     }
 
-    console.error('');
-    console.error('========================================');
+    logger.error('');
+    logger.error('========================================');
 
 }

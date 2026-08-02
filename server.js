@@ -15,6 +15,8 @@ import { tratarMenu } from './handlers/menuHandler.js';
 
 import { errorHandler } from './errors/errorHandler.js';
 
+import { logger } from './utils/logger.js';
+
 // Tempo máximo de idade da mensagem em segundos
 const tempoMaximo = process.env.MESSAGE_MAX_AGE || 60;
 
@@ -26,21 +28,21 @@ app.use(express.json());
 // Webhook da Evolution API.  Toda mensagem recebida pela instância do WhatsApp chegará aqui.
 app.post('/webhook', async (req, res) => {
 
-    console.log(
+    logger.info(
         JSON.stringify(req.body, null, 2)
     );
 
-    console.log('📩 Evento recebido');
+    logger.info('📩 Evento recebido');
 
     //  Ignora mensagens antigas. A Evolution pode reenviar mensagens antigas quando reinicia. Se a mensagem tiver mais de 60 segundos, ela será ignorada.
     const timestamp = req.body?.data?.messageTimestamp;
     const agora = Math.floor(Date.now() / 1000);
     const idadeMensagem = agora - timestamp;
-    console.log('Idade da mensagem:', idadeMensagem, 'segundos');
+    logger.info('Idade da mensagem:', idadeMensagem, 'segundos');
 
     if (idadeMensagem > tempoMaximo) {
 
-        console.log(
+        logger.warn(
             '🚫 Mensagem antiga ignorada'
         );
 
@@ -52,7 +54,7 @@ app.post('/webhook', async (req, res) => {
 
     if (fromMe) {
 
-        console.log('🚫 Mensagem enviada pelo próprio bot');
+        logger.warn('🚫 Mensagem enviada pelo próprio bot');
 
         return res.sendStatus(200);
     }
@@ -72,7 +74,7 @@ app.post('/webhook', async (req, res) => {
     //  Ignora grupos.
     if (!jid?.includes('@s.whatsapp.net')) {
 
-        console.log('🚫 Grupo ignorado');
+        logger.warn('🚫 Grupo ignorado');
 
         return res.sendStatus(200);
     }
@@ -98,12 +100,12 @@ app.post('/webhook', async (req, res) => {
             req.body?.data?.message?.conversation ||
             req.body?.data?.message?.extendedTextMessage?.text
         )?.trim().toLowerCase();
-    console.log('Número:', numero);
-    console.log('Mensagem:', mensagem);
+    logger.info('Número:', numero);
+    logger.info('Mensagem:', mensagem);
 
     // Se não existir texto, encerra processamento
     if (!mensagem) {
-        console.log('⚠️ Evento sem texto');
+        logger.warn('⚠️ Evento sem texto');
         return res.sendStatus(200);
     }
 
@@ -145,7 +147,7 @@ app.post('/webhook', async (req, res) => {
 // Inicialização do servidor
 app.listen(process.env.PORT, '0.0.0.0', () => {
 
-    console.log(
+    logger.info(
         `🚀 Bot rodando na porta ${process.env.PORT}`
     );
 });
